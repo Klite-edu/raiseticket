@@ -3,6 +3,7 @@ import Ticket from "../models/Ticket.js";
 
 const router = express.Router();
 
+// Create a new ticket
 router.post("/tickets", async (req, res) => {
   try {
     const { email, issue, description, priority } = req.body;
@@ -14,6 +15,7 @@ router.post("/tickets", async (req, res) => {
   }
 });
 
+// Fetch all tickets
 router.get("/tickets", async (req, res) => {
   try {
     const tickets = await Ticket.find();
@@ -23,5 +25,24 @@ router.get("/tickets", async (req, res) => {
   }
 });
 
-export default router;
+// Update ticket status to "resolved"
+router.put("/tickets/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      id,
+      { status: "resolved", resolvedAt: new Date() },
+      { new: true }
+    );
 
+    if (!updatedTicket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+
+    res.status(200).json(updatedTicket);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update ticket" });
+  }
+});
+
+export default router;
